@@ -81,3 +81,56 @@ using (TextFieldParser parser = new TextFieldParser("data.csv"))
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[Test]
+public void TestBinaryTreeTraversal()
+{
+    // Arrange
+    var root = Substitute.For<Node>();
+    root.Value.Returns(1);
+    var leftChild = Substitute.For<Node>();
+    leftChild.Value.Returns(2);
+    var rightChild = Substitute.For<Node>();
+    rightChild.Value.Returns(3);
+
+    root.Left = leftChild;
+    root.Right = rightChild;
+
+    // Act
+    var result = TraverseBinaryTree(root);
+
+    // Assert
+    Assert.AreEqual(new List<int> { 1, 2, 3 }, result);
+}
+
+private List<int> TraverseBinaryTree(Node node)
+{
+    if (node == null) return new List<int>();
+
+    var result = new List<int>();
+    result.Add(node.Value);
+
+    result.AddRange(TraverseBinaryTree(node.Left));
+    result.AddRange(TraverseBinaryTree(node.Right));
+
+    return result;
+}
+
+
+
+

@@ -1,54 +1,51 @@
 ﻿// See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, World!");
 
+using Microsoft.VisualBasic.FileIO;
 
-string[][] csvArray;
-
-using (var reader = new StreamReader(filePath))
+// Create a TextFieldParser to read the CSV file
+using (TextFieldParser parser = new TextFieldParser("data.csv"))
 {
-    List<string[]> rows = new List<string[]>();
-    while (!reader.EndOfStream)
+    parser.TextFieldType = FieldType.Delimited;
+    parser.SetDelimiters(",");
+
+    // Read the header row to determine the column names and data types
+    string[] headers = parser.ReadFields();
+    Type[] columnTypes = new Type[headers.Length];
+
+    for (int i = 0; i < headers.Length; i++)
     {
-        string line = reader.ReadLine();
-        string[] row = line.Split(',');
-        rows.Add(row);
-    }
-    csvArray = rows.ToArray();
-}
+        // Assume that all columns are strings initially
+        columnTypes[i] = typeof(string);
 
-
-
-
-
-string filePath = @"C:\example.csv";
-string[][] dataArray;
-
-using (var reader = new StreamReader(filePath))
-{
-    int rows = 0;
-    while (!reader.EndOfStream)
-    {
-        reader.ReadLine();
-        rows++;
-    }
-
-    dataArray = new string[rows][];
-    reader.BaseStream.Seek(0, SeekOrigin.Begin);
-
-    int row = 0;
-    while (!reader.EndOfStream)
-    {
-        string line = reader.ReadLine();
-        string[] values = line.Split(',');
-        dataArray[row] = new string[values.Length];
-
-        for (int i = 0; i < values.Length; i++)
+        // Try to parse the first value in the column to determine its data type
+        while (!parser.EndOfData)
         {
-            dataArray[row][i] = values[i];
+            string[] fields = parser.ReadFields();
+            if (fields[i] != null && fields[i].Length > 0)
+            {
+                if (int.TryParse(fields[i], out _))
+                {
+                    columnTypes[i] = typeof(int);
+                    break;
+                }
+                else if (double.TryParse(fields[i], out _))
+                {
+                    columnTypes[i] = typeof(double);
+                    break;
+                }
+                else if (DateTime.TryParse(fields[i], out _))
+                {
+                    columnTypes[i] = typeof(DateTime);
+                    break;
+                }
+            }
         }
-        row++;
+
+        // Reset the parser back to the beginning of the file
+        parser.DiscardBufferedData();
+        parser.BaseStream.Seek(0, System.IO.SeekOrigin.Begin);
     }
+
+    // Now you can process the CSV data using the columnTypes array to determine the appropriate type conversions
 }
-
-
-

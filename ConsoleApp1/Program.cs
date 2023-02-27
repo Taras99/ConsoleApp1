@@ -1,7 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
-
-using Microsoft.VisualBasic.FileIO;
+﻿using Microsoft.VisualBasic.FileIO;
+using System.Collections.Generic;
 
 // Create a TextFieldParser to read the CSV file
 using (TextFieldParser parser = new TextFieldParser("data.csv"))
@@ -48,4 +46,38 @@ using (TextFieldParser parser = new TextFieldParser("data.csv"))
     }
 
     // Now you can process the CSV data using the columnTypes array to determine the appropriate type conversions
+    List<List<double>> data = new List<List<double>>();
+
+    while (!parser.EndOfData)
+    {
+        string[] fields = parser.ReadFields();
+        List<double> row = new List<double>();
+
+        for (int i = 0; i < fields.Length; i++)
+        {
+            if (columnTypes[i] == typeof(int))
+            {
+                int value;
+                int.TryParse(fields[i], out value);
+                row.Add((double)value);
+            }
+            else if (columnTypes[i] == typeof(double))
+            {
+                double value;
+                double.TryParse(fields[i], out value);
+                row.Add(value);
+            }
+            else if (columnTypes[i] == typeof(DateTime))
+            {
+                DateTime value;
+                DateTime.TryParse(fields[i], out value);
+                row.Add(value.Ticks);
+            }
+        }
+
+        if (row.Count > 0)
+        {
+            data.Add(row);
+        }
+    }
 }
